@@ -1,0 +1,699 @@
+# h-c-b-i-2
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Học Tiếng Việt Lớp 1 - Bé Ngọc Bích & Chíp Xinh Gái</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fredoka', 'Quicksand', 'sans-serif'],
+                    },
+                    colors: {
+                        brandPink: '#FF5E7E',
+                        brandYellow: '#FFC048',
+                        brandPurple: '#8854D0',
+                        brandGreen: '#2ED573',
+                        brandBlue: '#1E90FF',
+                        brandOrange: '#FF7F50',
+                    },
+                    boxShadow: {
+                        'cartoon': '0px 6px 0px 0px rgba(0, 0, 0, 0.18)',
+                        'cartoon-lg': '0px 8px 0px 0px rgba(0, 0, 0, 0.22)',
+                        'cartoon-sm': '0px 3px 0px 0px rgba(0, 0, 0, 0.15)',
+                    },
+                    animation: {
+                        'bounce-fun': 'bounceFun 1.2s infinite',
+                        'wiggle': 'wiggle 0.7s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 1.2s infinite',
+                    },
+                    keyframes: {
+                        bounceFun: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        },
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-4deg)' },
+                            '50%': { transform: 'rotate(4deg)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { filter: 'drop-shadow(0 0 8px rgba(255, 94, 126, 0.6))' },
+                            '50%': { filter: 'drop-shadow(0 0 18px rgba(255, 192, 72, 0.9))' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', 'Quicksand', sans-serif;
+            background: #FFF0F5;
+            background-image: radial-gradient(#FFB6C1 1.5px, transparent 1.5px), radial-gradient(#FFB6C1 1.5px, #FFF0F5 1.5px);
+            background-size: 26px 26px;
+            background-position: 0 0, 13px 13px;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .btn-cartoon {
+            transition: all 0.12s ease-in-out;
+        }
+        .btn-cartoon:active {
+            transform: translateY(4px) scale(0.97);
+            box-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .mic-wave {
+            box-shadow: 0 0 0 0 rgba(255, 94, 126, 0.7);
+            animation: pulse-ring 1.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 94, 126, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(255, 94, 126, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 94, 126, 0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-20 flex flex-col items-center">
+
+    <!-- Parent Lock Modal -->
+    <div id="parent-lock-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 border-4 border-brandPurple shadow-cartoon-lg text-center animate-wiggle">
+            <div class="w-16 h-16 bg-purple-100 border-3 border-brandPurple rounded-full flex items-center justify-center text-3xl mx-auto mb-3">
+                🔒
+            </div>
+            <h3 class="text-xl font-black text-brandPurple mb-1">Xác Nhận Phụ Huynh</h3>
+            <p class="text-xs font-semibold text-gray-600 mb-4">Nhập mật khẩu phụ huynh để thoát khỏi bài học của Chíp / Ngọc Bích:</p>
+            
+            <input type="password" id="lock-pass-input" placeholder="Nhập mật khẩu..." maxlength="7"
+                class="w-full text-center text-2xl font-black tracking-widest py-3 border-3 border-purple-300 rounded-2xl mb-3 focus:outline-none focus:border-brandPurple bg-purple-50">
+            
+            <div id="lock-error-msg" class="text-xs font-bold text-red-500 min-h-[1.25rem] mb-2"></div>
+
+            <div class="flex gap-2">
+                <button onclick="closeParentLockModal()" class="btn-cartoon flex-1 bg-gray-200 text-gray-700 font-extrabold py-3 rounded-2xl shadow-cartoon-sm">
+                    Quay Lại Học
+                </button>
+                <button onclick="verifyParentPassword()" class="btn-cartoon flex-1 bg-brandPurple text-white font-extrabold py-3 rounded-2xl shadow-cartoon-sm">
+                    Mở Khóa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile-Optimized Header -->
+    <header class="w-full max-w-md px-3 pt-3 sticky top-0 z-30">
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl p-3 border-4 border-brandPink shadow-cartoon flex items-center justify-between">
+            
+            <!-- Mascot & Personal Greeting -->
+            <div class="flex items-center gap-2" onclick="speakText('Chào Ngọc Bích xinh gái, chào Chíp giỏi quá! Cùng học đánh vần nhé!')">
+                <div class="relative">
+                    <div class="w-12 h-12 bg-pink-100 border-2 border-brandPink rounded-full flex items-center justify-center text-2xl shadow-inner animate-wiggle">
+                        🐥
+                    </div>
+                    <span class="absolute -bottom-1 -right-1 text-xs">👑</span>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-brandPink leading-tight flex items-center gap-1">
+                        Ngọc Bích <span class="text-[10px] bg-pink-200 text-pink-700 font-extrabold px-1.5 py-0.5 rounded-full">Chíp</span>
+                    </h1>
+                    <p class="text-[11px] font-bold text-purple-700">Tiếng Việt 1 • Bài Đánh Vần</p>
+                </div>
+            </div>
+
+            <!-- Score & Parent Lock Button -->
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1 bg-amber-100 border-2 border-amber-300 px-2.5 py-1 rounded-2xl">
+                    <i class="fa-solid fa-star text-xl text-yellow-400 animate-bounce-fun"></i>
+                    <span id="star-count" class="text-xl font-black text-amber-700">0</span>
+                </div>
+                <button onclick="openParentLockModal()" class="w-9 h-9 bg-purple-100 border-2 border-purple-300 rounded-2xl flex items-center justify-center text-purple-700 font-bold active:scale-95 shadow-cartoon-sm">
+                    🔒
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="w-full max-w-md px-3 mt-3 z-20">
+        <div class="bg-white rounded-2xl p-1.5 border-3 border-pink-200 shadow-cartoon flex justify-between gap-1">
+            <button id="tab-learn-btn" onclick="switchTab('learn')" 
+                class="btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 bg-brandPink text-white shadow-cartoon-sm">
+                <i class="fa-solid fa-book-open text-base"></i>
+                <span>Học Đánh Vần</span>
+            </button>
+            <button id="tab-mic-btn" onclick="switchTab('mic')" 
+                class="btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 text-gray-600">
+                <i class="fa-solid fa-microphone text-base text-rose-500"></i>
+                <span>Đọc Vào Mic</span>
+            </button>
+            <button id="tab-quiz-btn" onclick="switchTab('quiz')" 
+                class="btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 text-gray-600">
+                <i class="fa-solid fa-gamepad text-base text-amber-500"></i>
+                <span>Trắc Nghiệm</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Mobile Content Area -->
+    <main class="w-full max-w-md px-3 mt-3 flex-grow">
+
+        <!-- TAB 1: HỌC ĐÁNH VẦN (Nội dung Đề bài) -->
+        <section id="tab-learn" class="space-y-4">
+            
+            <!-- Câu Đọc Mẫu Trọng Tâm -->
+            <div class="bg-white rounded-3xl p-4 border-4 border-amber-300 shadow-cartoon">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="bg-amber-400 text-white text-xs font-black px-2.5 py-1 rounded-lg">CÂU TẬP ĐỌC</span>
+                    <h2 class="text-xs font-bold text-gray-600">Chạm để nghe loa đọc mẫu</h2>
+                </div>
+
+                <div onclick="speakText('Nam vẽ kì đà')" class="btn-cartoon bg-gradient-to-r from-amber-50 to-orange-50 border-3 border-amber-300 rounded-2xl p-4 flex items-center justify-between shadow-cartoon-sm cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <span class="text-5xl animate-bounce-fun">🦎</span>
+                        <div>
+                            <div class="text-2xl font-black text-amber-900">"Nam vẽ kì đà"</div>
+                            <p class="text-xs font-bold text-amber-600">N-am Nam, v-e-ngã vẽ, k-i-huyền kì, đ-a-huyền đà</p>
+                        </div>
+                    </div>
+                    <button class="w-10 h-10 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-cartoon-sm flex-shrink-0">
+                        <i class="fa-solid fa-volume-high text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bảng Dấu Thanh KÈ, KẺ, KỆ, KỈ, KĨ -->
+            <div class="bg-white rounded-3xl p-4 border-4 border-pink-300 shadow-cartoon">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-brandPink text-white text-xs font-black px-2.5 py-1 rounded-lg">LỚP DẤU THANH</span>
+                    <h2 class="text-xs font-bold text-gray-700">Ghép âm k + e / i & Dấu thanh</h2>
+                </div>
+
+                <div class="grid grid-cols-5 gap-1.5">
+                    <!-- kè -->
+                    <div onclick="speakText('kè - ca e ke huyền kè')" class="btn-cartoon bg-pink-50 border-2 border-pink-300 rounded-xl p-2 text-center shadow-cartoon-sm">
+                        <span class="text-xl font-black text-pink-700 block">kè</span>
+                        <span class="text-[9px] font-bold text-pink-500">Huyền</span>
+                    </div>
+                    <!-- kẻ -->
+                    <div onclick="speakText('kẻ - ca e ke hỏi kẻ')" class="btn-cartoon bg-purple-50 border-2 border-purple-300 rounded-xl p-2 text-center shadow-cartoon-sm">
+                        <span class="text-xl font-black text-purple-700 block">kẻ</span>
+                        <span class="text-[9px] font-bold text-purple-500">Hỏi</span>
+                    </div>
+                    <!-- kệ -->
+                    <div onclick="speakText('kệ - ca ê kê nặng kệ')" class="btn-cartoon bg-blue-50 border-2 border-blue-300 rounded-xl p-2 text-center shadow-cartoon-sm">
+                        <span class="text-xl font-black text-blue-700 block">kệ</span>
+                        <span class="text-[9px] font-bold text-blue-500">Nặng</span>
+                    </div>
+                    <!-- kỉ -->
+                    <div onclick="speakText('kỉ - ca i ki hỏi kỉ')" class="btn-cartoon bg-emerald-50 border-2 border-emerald-300 rounded-xl p-2 text-center shadow-cartoon-sm">
+                        <span class="text-xl font-black text-emerald-700 block">kỉ</span>
+                        <span class="text-[9px] font-bold text-emerald-500">Hỏi</span>
+                    </div>
+                    <!-- kĩ -->
+                    <div onclick="speakText('kĩ - ca i ki ngã kĩ')" class="btn-cartoon bg-orange-50 border-2 border-orange-300 rounded-xl p-2 text-center shadow-cartoon-sm">
+                        <span class="text-xl font-black text-orange-700 block">kĩ</span>
+                        <span class="text-[9px] font-bold text-orange-500">Ngã</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Từ Ứng Dụng Trang 34 / Đề bài -->
+            <div class="bg-white rounded-3xl p-4 border-4 border-purple-300 shadow-cartoon">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-brandPurple text-white text-xs font-black px-2.5 py-1 rounded-lg">TỪ ỨNG DỤNG</span>
+                    <h2 class="text-xs font-bold text-gray-700">Chạm từng hình để nghe đọc</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- bí đỏ -->
+                    <div onclick="speakText('bí đỏ - bờ i bi sắc bí, đơ o do hỏi đỏ')" class="btn-cartoon bg-rose-50 border-3 border-rose-300 rounded-2xl p-3 text-center shadow-cartoon-sm flex flex-col items-center">
+                        <span class="text-4xl mb-1">🎃</span>
+                        <span class="text-2xl font-black text-rose-800">bí đỏ</span>
+                        <span class="text-[10px] font-semibold text-rose-500">bí - đỏ</span>
+                    </div>
+
+                    <!-- kẻ ô -->
+                    <div onclick="speakText('kẻ ô - ca e ke hỏi kẻ, ô')" class="btn-cartoon bg-sky-50 border-3 border-sky-300 rounded-2xl p-3 text-center shadow-cartoon-sm flex flex-col items-center">
+                        <span class="text-4xl mb-1">📐</span>
+                        <span class="text-2xl font-black text-sky-800">kẻ ô</span>
+                        <span class="text-[10px] font-semibold text-sky-500">kẻ - ô</span>
+                    </div>
+
+                    <!-- đi đò -->
+                    <div onclick="speakText('đi đò - đơ i đi, đơ o do huyền đò')" class="btn-cartoon bg-teal-50 border-3 border-teal-300 rounded-2xl p-3 text-center shadow-cartoon-sm flex flex-col items-center">
+                        <span class="text-4xl mb-1">🚣</span>
+                        <span class="text-2xl font-black text-teal-800">đi đò</span>
+                        <span class="text-[10px] font-semibold text-teal-500">đi - đò</span>
+                    </div>
+
+                    <!-- kì đà -->
+                    <div onclick="speakText('kì đà - ca i ki huyền kì, đơ a đa huyền đà')" class="btn-cartoon bg-amber-50 border-3 border-amber-300 rounded-2xl p-3 text-center shadow-cartoon-sm flex flex-col items-center">
+                        <span class="text-4xl mb-1">🦎</span>
+                        <span class="text-2xl font-black text-amber-800">kì đà</span>
+                        <span class="text-[10px] font-semibold text-amber-500">kì - đà</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- TAB 2: ĐỌC VÀO MIC (Speech Recognition) -->
+        <section id="tab-mic" class="hidden space-y-4">
+            <div class="bg-white rounded-3xl p-5 border-4 border-rose-300 shadow-cartoon text-center flex flex-col items-center">
+                
+                <span class="bg-rose-100 text-rose-700 font-extrabold px-3 py-1 rounded-xl text-xs mb-2 border border-rose-300">
+                    🎤 THỬ THÁCH ĐỌC TIẾNG VIỆT
+                </span>
+
+                <p class="text-xs font-bold text-gray-600 mb-3">Bé hãy nhìn từ mẫu bên dưới và nhấn Micro để đọc nhé!</p>
+
+                <!-- Current Target Word Display -->
+                <div class="w-full bg-pink-50 border-3 border-pink-300 rounded-2xl p-4 mb-4 relative">
+                    <span id="mic-target-word" class="text-3xl font-black text-brandPink tracking-wide">
+                        Nam vẽ kì đà
+                    </span>
+                    <button onclick="speakText(document.getElementById('mic-target-word').innerText)" class="absolute right-3 top-3 w-8 h-8 bg-pink-200 text-pink-700 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-volume-high text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Big Microphone Button -->
+                <div class="relative my-2">
+                    <button id="mic-btn" onclick="toggleSpeechRecognition()" 
+                        class="w-24 h-24 bg-gradient-to-tr from-brandPink to-rose-400 text-white rounded-full flex items-center justify-center text-4xl shadow-cartoon border-4 border-white active:scale-95 transition-all">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                </div>
+
+                <div id="mic-status-text" class="text-xs font-extrabold text-gray-500 my-2">
+                    Nhấn vào Micro để Chíp đọc nhé!
+                </div>
+
+                <!-- Recognized Speech Output -->
+                <div class="w-full bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-3 min-h-[3rem] flex items-center justify-center text-sm font-bold text-purple-800" id="speech-result-box">
+                    Lời bé đọc sẽ hiện ở đây...
+                </div>
+
+                <!-- Word Selection Cards to practice reading -->
+                <div class="w-full mt-4 pt-3 border-t border-gray-200">
+                    <p class="text-xs font-bold text-gray-500 mb-2">Đổi từ khác để luyện tập:</p>
+                    <div class="flex flex-wrap justify-center gap-1.5">
+                        <button onclick="setMicTarget('Nam vẽ kì đà')" class="bg-pink-100 text-pink-800 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-pink-300 active:scale-95">Nam vẽ kì đà</button>
+                        <button onclick="setMicTarget('bí đỏ')" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-amber-300 active:scale-95">bí đỏ</button>
+                        <button onclick="setMicTarget('kẻ ô')" class="bg-sky-100 text-sky-800 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-sky-300 active:scale-95">kẻ ô</button>
+                        <button onclick="setMicTarget('đi đò')" class="bg-teal-100 text-teal-800 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-teal-300 active:scale-95">đi đò</button>
+                        <button onclick="setMicTarget('kì đà')" class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-purple-300 active:scale-95">kì đà</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 3: TRẮC NGHIỆM TƯƠNG TÁC -->
+        <section id="tab-quiz" class="hidden space-y-4">
+            <div class="bg-white rounded-3xl p-4 border-4 border-amber-300 shadow-cartoon text-center">
+                
+                <div class="flex items-center justify-between mb-2">
+                    <span id="quiz-progress" class="bg-amber-100 text-amber-800 font-black px-3 py-1 rounded-xl text-xs border border-amber-300">
+                        Câu 1 / 5
+                    </span>
+                    <button onclick="playQuizPromptSound()" class="btn-cartoon bg-amber-400 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl border-2 border-white shadow-cartoon-sm flex items-center gap-1.5 text-xs">
+                        <i class="fa-solid fa-volume-high"></i> Nghe câu hỏi
+                    </button>
+                </div>
+
+                <div class="my-3 flex flex-col items-center">
+                    <div class="w-16 h-16 bg-pink-100 border-3 border-brandPink rounded-full flex items-center justify-center text-3xl shadow-cartoon animate-bounce-fun mb-2">
+                        🐥
+                    </div>
+                    <h3 id="quiz-prompt-text" class="text-lg font-black text-gray-800 px-1 leading-snug">
+                        Đang tải câu hỏi...
+                    </h3>
+                </div>
+
+                <div id="quiz-options-grid" class="grid grid-cols-2 gap-3 mt-3">
+                    <!-- Dynamic Answer Buttons -->
+                </div>
+
+                <div id="quiz-feedback-box" class="mt-4 min-h-[3.5rem] flex items-center justify-center text-center font-black text-base px-2">
+                    <!-- Dynamic Praise or Funny Critique Feedback -->
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- App Logic Script -->
+    <script>
+        // --- Parent Lock Config ---
+        const PARENT_PASSWORD = "6523008";
+
+        function openParentLockModal() {
+            document.getElementById('lock-pass-input').value = '';
+            document.getElementById('lock-error-msg').innerText = '';
+            document.getElementById('parent-lock-modal').classList.remove('hidden');
+        }
+
+        function closeParentLockModal() {
+            document.getElementById('parent-lock-modal').classList.add('hidden');
+        }
+
+        function verifyParentPassword() {
+            const input = document.getElementById('lock-pass-input').value.trim();
+            if (input === PARENT_PASSWORD) {
+                closeParentLockModal();
+                alert("Mở khóa thành công! Chúc Ngọc Bích & Chíp học thật vui!");
+                speakText("Mở khóa phụ huynh thành công!");
+            } else {
+                document.getElementById('lock-error-msg').innerText = "Mật khẩu phụ huynh chưa đúng!";
+                playWrongSound();
+                speakText("Mật khẩu phụ huynh không đúng!");
+            }
+        }
+
+        // Prevent accidental back button / exit
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, null, window.location.href);
+            openParentLockModal();
+        };
+
+        window.onbeforeunload = function () {
+            return "Bé Chíp đang học bài, phụ huynh có chắc muốn thoát không?";
+        };
+
+        // --- Requested Praise & Critique Audio/Speech Lists ---
+        const praiseList = [
+            "Ngọc Bích xinh gái giỏi quá!",
+            "Chíp giỏi quá!",
+            "Tuyệt vời quá Ngọc Bích xinh gái ơi!",
+            "Chíp xuất sắc quá!"
+        ];
+
+        const critiqueList = [
+            "Chíp ngu",
+            "Chíp là con bò"
+        ];
+
+        function getRandomPraise() {
+            return praiseList[Math.floor(Math.random() * praiseList.length)];
+        }
+
+        function getRandomCritique() {
+            return critiqueList[Math.floor(Math.random() * critiqueList.length)];
+        }
+
+        // --- Web Audio Sound Effects ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSuccessSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.35); 
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        }
+
+        function playWrongSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // --- Speech Synthesis (Tiếng Việt) ---
+        function speakText(text, onEndCallback = null) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 0.85; 
+                utterance.pitch = 1.15;
+                if (onEndCallback) {
+                    utterance.onend = onEndCallback;
+                }
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // --- Navigation Logic ---
+        let stars = 0;
+
+        function switchTab(tab) {
+            document.getElementById('tab-learn').classList.add('hidden');
+            document.getElementById('tab-mic').classList.add('hidden');
+            document.getElementById('tab-quiz').classList.add('hidden');
+
+            const btnLearn = document.getElementById('tab-learn-btn');
+            const btnMic = document.getElementById('tab-mic-btn');
+            const btnQuiz = document.getElementById('tab-quiz-btn');
+
+            btnLearn.className = "btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 text-gray-600";
+            btnMic.className = "btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 text-gray-600";
+            btnQuiz.className = "btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 text-gray-600";
+
+            if (tab === 'learn') {
+                document.getElementById('tab-learn').classList.remove('hidden');
+                btnLearn.className = "btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 bg-brandPink text-white shadow-cartoon-sm";
+            } else if (tab === 'mic') {
+                document.getElementById('tab-mic').classList.remove('hidden');
+                btnMic.className = "btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 bg-rose-500 text-white shadow-cartoon-sm";
+            } else if (tab === 'quiz') {
+                document.getElementById('tab-quiz').classList.remove('hidden');
+                btnQuiz.className = "btn-cartoon flex-1 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 bg-amber-400 text-white shadow-cartoon-sm";
+                loadQuizQuestion();
+            }
+        }
+
+        // --- TAB 2: SPEECH RECOGNITION (ĐỌC VÀO MIC) ---
+        let recognition = null;
+        let isListening = false;
+
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechReg = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechReg();
+            recognition.lang = 'vi-VN';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                isListening = true;
+                const micBtn = document.getElementById('mic-btn');
+                micBtn.classList.add('mic-wave', 'bg-rose-600');
+                document.getElementById('mic-status-text').innerText = "🎙️ Đang lắng nghe Chíp đọc...";
+                document.getElementById('mic-status-text').className = "text-xs font-extrabold text-rose-600 animate-pulse";
+            };
+
+            recognition.onresult = function(event) {
+                const spokenText = event.results[0][0].transcript.toLowerCase().trim();
+                document.getElementById('speech-result-box').innerText = `Bé vừa đọc: "${spokenText}"`;
+                
+                const targetText = document.getElementById('mic-target-word').innerText.toLowerCase().trim();
+
+                // Check similarity
+                if (spokenText.includes(targetText) || targetText.includes(spokenText)) {
+                    playSuccessSound();
+                    stars += 10;
+                    document.getElementById('star-count').innerText = stars;
+
+                    const praise = getRandomPraise();
+                    speakText(praise);
+
+                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                    document.getElementById('mic-status-text').innerText = `🎉 ${praise}`;
+                    document.getElementById('mic-status-text').className = "text-xs font-black text-emerald-600";
+                } else {
+                    playWrongSound();
+                    const critique = getRandomCritique();
+                    speakText(critique);
+
+                    document.getElementById('mic-status-text').innerText = `🤪 ${critique}! Thử đọc lại nhé!`;
+                    document.getElementById('mic-status-text').className = "text-xs font-black text-rose-500";
+                }
+            };
+
+            recognition.onerror = function(event) {
+                stopListeningState();
+                document.getElementById('speech-result-box').innerText = "Chưa nghe rõ, bé bấm nút đọc lại nhé!";
+            };
+
+            recognition.onend = function() {
+                stopListeningState();
+            };
+        } else {
+            document.getElementById('speech-result-box').innerText = "Trình duyệt này không hỗ trợ mic, bé chọn câu hỏi bên phần Trắc Nghiệm nhé!";
+        }
+
+        function stopListeningState() {
+            isListening = false;
+            const micBtn = document.getElementById('mic-btn');
+            micBtn.classList.remove('mic-wave', 'bg-rose-600');
+            document.getElementById('mic-status-text').innerText = "Nhấn vào Micro để Chíp đọc nhé!";
+            document.getElementById('mic-status-text').className = "text-xs font-extrabold text-gray-500 my-2";
+        }
+
+        function toggleSpeechRecognition() {
+            if (!recognition) {
+                alert("Trình duyệt không hỗ trợ micro nhận diện giọng nói!");
+                return;
+            }
+            if (isListening) {
+                recognition.stop();
+            } else {
+                try {
+                    recognition.start();
+                } catch(e) {
+                    recognition.stop();
+                }
+            }
+        }
+
+        function setMicTarget(word) {
+            document.getElementById('mic-target-word').innerText = word;
+            speakText("Bé hãy đọc từ " + word);
+        }
+
+        // --- TAB 3: TRẮC NGHIỆM DATA & LOGIC ---
+        let currentQuizIndex = 0;
+        const quizQuestions = [
+            {
+                prompt: "Ngọc Bích / Chíp hãy chọn câu 'Nam vẽ kì đà' nhé!",
+                speakPrompt: "Bé hãy chọn câu Nam vẽ kì đà!",
+                options: [
+                    { label: "🦎 Nam vẽ kì đà", correct: true },
+                    { label: "🚣 Bờ hồ có đò", correct: false },
+                    { label: "🎃 Bé có bí đỏ", correct: false },
+                    { label: "📐 Bé kẻ ô", correct: false }
+                ]
+            },
+            {
+                prompt: "Đâu là từ 'bí đỏ' vậy Chíp xinh gái?",
+                speakPrompt: "Đâu là từ bí đỏ vậy Chíp?",
+                options: [
+                    { label: "đi đò", correct: false },
+                    { label: "bí đỏ", correct: true },
+                    { label: "kì đà", correct: false },
+                    { label: "kẻ ô", correct: false }
+                ]
+            },
+            {
+                prompt: "Bé tìm tiếng 'kệ' (cái kệ sách) nhé!",
+                speakPrompt: "Bé tìm tiếng kệ giúp thỏ nào!",
+                options: [
+                    { label: "kè", correct: false },
+                    { label: "kẻ", correct: false },
+                    { label: "kệ", correct: true },
+                    { label: "kĩ", correct: false }
+                ]
+            },
+            {
+                prompt: "Đâu là từ 'kì đà' (con kì đà)?",
+                speakPrompt: "Chíp tìm từ kì đà nhé!",
+                options: [
+                    { label: "kì đà", correct: true },
+                    { label: "đi đò", correct: false },
+                    { label: "bí đỏ", correct: false },
+                    { label: "kẻ ô", correct: false }
+                ]
+            },
+            {
+                prompt: "Bé chọn từ 'kẻ ô' giúp cô giáo nhé!",
+                speakPrompt: "Ngọc Bích tìm từ kẻ ô nào!",
+                options: [
+                    { label: "đi đò", correct: false },
+                    { label: "kẻ ô", correct: true },
+                    { label: "kì đà", correct: false },
+                    { label: "bí đỏ", correct: false }
+                ]
+            }
+        ];
+
+        function playQuizPromptSound() {
+            speakText(quizQuestions[currentQuizIndex].speakPrompt);
+        }
+
+        function loadQuizQuestion() {
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quiz-progress').innerText = `Câu ${currentQuizIndex + 1} / ${quizQuestions.length}`;
+            document.getElementById('quiz-prompt-text').innerText = q.prompt;
+            document.getElementById('quiz-feedback-box').innerHTML = '';
+
+            const grid = document.getElementById('quiz-options-grid');
+            grid.innerHTML = '';
+
+            playQuizPromptSound();
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-cartoon bg-gradient-to-b from-amber-50 to-amber-100 hover:from-amber-100 border-3 border-amber-300 font-extrabold text-amber-900 py-3 px-2 rounded-2xl shadow-cartoon text-base flex items-center justify-center';
+                btn.innerText = opt.label;
+                btn.onclick = () => checkQuizAnswer(opt);
+                grid.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(option) {
+            const feedbackBox = document.getElementById('quiz-feedback-box');
+            if (option.correct) {
+                playSuccessSound();
+                stars += 10;
+                document.getElementById('star-count').innerText = stars;
+
+                const praiseMsg = getRandomPraise();
+                feedbackBox.innerHTML = `<span class="text-pink-600 font-black text-lg animate-bounce-fun">${praiseMsg} 🎉 +10 ⭐</span>`;
+                speakText(praiseMsg);
+
+                confetti({ particleCount: 75, spread: 60, origin: { y: 0.65 } });
+
+                setTimeout(() => {
+                    currentQuizIndex = (currentQuizIndex + 1) % quizQuestions.length;
+                    loadQuizQuestion();
+                }, 2400);
+            } else {
+                playWrongSound();
+                const critiqueMsg = getRandomCritique();
+                feedbackBox.innerHTML = `<span class="text-rose-600 font-black text-lg">🤪 ${critiqueMsg}! Thử chọn lại nhé!</span>`;
+                speakText(critiqueMsg);
+            }
+        }
+
+        // Initialize App
+        window.onload = function() {
+            switchTab('learn');
+        };
+    </script>
+</body>
+</html>
